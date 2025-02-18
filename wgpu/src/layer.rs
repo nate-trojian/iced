@@ -1,3 +1,5 @@
+use std::sync::Weak;
+
 use crate::core::{
     self, renderer, Background, Color, Point, Rectangle, Svg, Transformation,
 };
@@ -109,6 +111,26 @@ impl Layer {
             clip_bounds: clip_bounds * transformation,
         };
 
+        self.pending_text.push(text);
+    }
+
+    pub fn draw_buffer(
+        &mut self,
+        buffer: Weak<iced_graphics::text::cosmic_text::Buffer>,
+        position: Point,
+        color: Color,
+        clip_bounds: Rectangle,
+        transformation: Transformation,
+    ) {
+        let text = Text::Raw {
+            raw: iced_graphics::text::Raw {
+                buffer,
+                position,
+                color,
+                clip_bounds,
+            },
+            transformation,
+        };
         self.pending_text.push(text);
     }
 

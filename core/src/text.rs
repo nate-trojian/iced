@@ -14,6 +14,7 @@ use crate::{
 
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
+use std::sync::Weak;
 
 /// A paragraph.
 #[derive(Debug, Clone, Copy)]
@@ -241,6 +242,15 @@ pub trait Renderer: crate::Renderer {
         color: Color,
         clip_bounds: Rectangle,
     );
+
+    /// Draws the given [`Buffer`] at the given position and with the given
+    /// [`Color`].
+    fn fill_buffer(
+        &mut self,
+        buffer: Weak<cosmic_text::Buffer>,
+        position: Point,
+        color: Color,
+        clip_bounds: Rectangle);
 }
 
 /// A span of text.

@@ -1,3 +1,5 @@
+use iced_graphics::text::Raw;
+
 use crate::core::renderer::Quad;
 use crate::core::{
     self, Background, Color, Point, Rectangle, Svg, Transformation,
@@ -9,6 +11,7 @@ use crate::graphics::{self, Image};
 use crate::Primitive;
 
 use std::rc::Rc;
+use std::sync::Weak;
 
 pub type Stack = layer::Stack<Layer>;
 
@@ -92,6 +95,26 @@ impl Layer {
             clip_bounds: clip_bounds * transformation,
         };
 
+        self.text.push(Item::Live(text));
+    }
+
+    pub fn draw_buffer(
+        &mut self,
+        buffer: Weak<cosmic_text::Buffer>,
+        position: Point,
+        color: Color,
+        clip_bounds: Rectangle,
+        transformation: Transformation,
+    ) {
+        let text = Text::Raw {
+            raw: Raw {
+                buffer,
+                position,
+                color,
+                clip_bounds,
+            },
+            transformation,
+        };
         self.text.push(Item::Live(text));
     }
 

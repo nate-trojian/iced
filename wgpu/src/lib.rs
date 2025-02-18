@@ -45,6 +45,8 @@ mod image;
 #[path = "image/null.rs"]
 mod image;
 
+use std::sync::Weak;
+
 use buffer::Buffer;
 
 pub use iced_graphics as graphics;
@@ -529,6 +531,16 @@ impl core::text::Renderer for Renderer {
     ) {
         let (layer, transformation) = self.layers.current_mut();
         layer.draw_text(text, position, color, clip_bounds, transformation);
+    }
+    
+    fn fill_buffer(
+        &mut self,
+        buffer: Weak<iced_graphics::text::cosmic_text::Buffer>,
+        position: Point,
+        color: Color,
+        clip_bounds: Rectangle) {
+        let (layer, transformation) = self.layers.current_mut();
+        layer.draw_buffer(buffer, position, color, clip_bounds, transformation);
     }
 }
 
