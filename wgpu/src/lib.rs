@@ -67,6 +67,7 @@ use crate::core::{
     Vector,
 };
 use crate::graphics::Viewport;
+use crate::graphics::text::cosmic_text;
 use crate::graphics::text::{Editor, Paragraph};
 
 /// A [`wgpu`] graphics renderer for [`iced`].
@@ -535,7 +536,7 @@ impl core::text::Renderer for Renderer {
 
     fn fill_buffer(
         &mut self,
-        buffer: Weak<glyphon::Buffer>,
+        buffer: Weak<cosmic_text::Buffer>,
         position: Point,
         clip_bounds: Rectangle,
     ) {

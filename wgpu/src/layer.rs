@@ -7,6 +7,7 @@ use crate::graphics;
 use crate::graphics::Mesh;
 use crate::graphics::color;
 use crate::graphics::layer;
+use crate::graphics::text::cosmic_text;
 use crate::graphics::text::{Editor, Paragraph, Raw};
 use crate::image::{self, Image};
 use crate::primitive::{self, Primitive};
@@ -119,7 +120,7 @@ impl Layer {
 
     pub fn draw_buffer(
         &mut self,
-        buffer: Weak<glyphon::Buffer>,
+        buffer: Weak<cosmic_text::Buffer>,
         position: Point,
         clip_bounds: Rectangle,
         transformation: Transformation,
