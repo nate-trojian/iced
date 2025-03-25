@@ -44,6 +44,9 @@ pub struct Settings {
     /// The initial position of the window.
     pub position: Position,
 
+    /// Specific monitor to open the window on.
+    pub monitor: Option<String>,
+
     /// The minimum size of the window.
     pub min_size: Option<Size>,
 
@@ -89,6 +92,7 @@ impl Default for Settings {
             maximized: false,
             fullscreen: false,
             position: Position::default(),
+            monitor: None,
             min_size: None,
             max_size: None,
             visible: true,
