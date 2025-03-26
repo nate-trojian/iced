@@ -377,13 +377,27 @@ where
                                 id,
                                 settings,
                                 title,
-                                monitor,
+                                last_used_monitor,
                                 on_open,
                             } => {
                                 let exit_on_close_request =
                                     settings.exit_on_close_request;
 
                                 let visible = settings.visible;
+
+                                let monitor_name = settings.monitor.clone();
+                                let monitor = monitor_name.map_or(
+                                    last_used_monitor
+                                        .or(event_loop.primary_monitor()),
+                                    |name| {
+                                        event_loop.available_monitors().find(
+                                            |m| {
+                                                m.name()
+                                                    .is_some_and(|n| n == name)
+                                            },
+                                        )
+                                    },
+                                );
 
                                 #[cfg(target_arch = "wasm32")]
                                 let target =
@@ -393,8 +407,7 @@ where
                                     conversion::window_attributes(
                                         settings,
                                         &title,
-                                        monitor
-                                            .or(event_loop.primary_monitor()),
+                                        monitor,
                                         self.id.clone(),
                                     )
                                     .with_visible(false);
@@ -545,7 +558,7 @@ enum Control {
         id: window::Id,
         settings: window::Settings,
         title: String,
-        monitor: Option<winit::monitor::MonitorHandle>,
+        last_used_monitor: Option<winit::monitor::MonitorHandle>,
         on_open: oneshot::Sender<window::Id>,
     },
 }
@@ -1218,14 +1231,14 @@ fn run_action<P, C>(
         },
         Action::Window(action) => match action {
             window::Action::Open(id, settings, channel) => {
-                let monitor = window_manager.last_monitor();
+                let last_used_monitor = window_manager.last_monitor();
 
                 control_sender
                     .start_send(Control::CreateWindow {
                         id,
                         settings,
                         title: program.title(id),
-                        monitor,
+                        last_used_monitor,
                         on_open: channel,
                     })
                     .expect("Send control action");
