@@ -14,6 +14,7 @@ pub struct State<P: Program>
 where
     P::Theme: theme::Base,
 {
+    id: window::Id,
     title: String,
     scale_factor: f64,
     viewport: Viewport,
@@ -65,6 +66,7 @@ where
         };
 
         Self {
+            id: window_id,
             title,
             scale_factor,
             viewport,
@@ -74,6 +76,11 @@ where
             theme,
             style,
         }
+    }
+
+    /// Returns the [`window::Id`] of the [`State`].
+    pub fn id(&self) -> window::Id {
+        self.id
     }
 
     /// Returns the current [`Viewport`] of the [`State`].

@@ -33,6 +33,7 @@ log.workspace = true
 rustc-hash.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+tray-icon.workspace = true
 window_clipboard.workspace = true
 winit.workspace = true
 

@@ -138,6 +138,10 @@ where
 
         Some(window)
     }
+
+    pub fn last_focused(&self) -> Option<&Window<P, C>> {
+        self.entries.values().find(|window| window.raw.has_focus())
+    }
 }
 
 impl<P, C> Default for WindowManager<P, C>

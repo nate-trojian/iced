@@ -16,6 +16,7 @@ pub mod overlay;
 pub mod program;
 pub mod system;
 pub mod task;
+pub mod tray_icon;
 pub mod user_interface;
 pub mod window;
 
@@ -70,6 +71,9 @@ pub enum Action<T> {
     /// Run a system action.
     System(system::Action),
 
+    /// Run a tray icon action.
+    TrayIcon(tray_icon::Action),
+
     /// Exits the runtime.
     ///
     /// This will normally close any application windows and
@@ -93,6 +97,7 @@ impl<T> Action<T> {
             Action::Clipboard(action) => Err(Action::Clipboard(action)),
             Action::Window(action) => Err(Action::Window(action)),
             Action::System(action) => Err(Action::System(action)),
+            Action::TrayIcon(action) => Err(Action::TrayIcon(action)),
             Action::Exit => Err(Action::Exit),
         }
     }
@@ -116,6 +121,7 @@ where
             }
             Action::Window(_) => write!(f, "Action::Window"),
             Action::System(action) => write!(f, "Action::System({action:?})"),
+            Action::TrayIcon(action) => write!(f, "Action::TrayIcon({action:?})"),
             Action::Exit => write!(f, "Action::Exit"),
         }
     }
