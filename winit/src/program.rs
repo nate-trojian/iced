@@ -1550,7 +1550,10 @@ fn run_action<P, C>(
                 let target_window = window_manager
                     .last_focused()
                     .or_else(|| window_manager.first());
-                let window_id = target_window.unwrap().state.id();
+                let window_id = match target_window {
+                    Some(w) => w.state.id(),
+                    None => return,
+                };
                 // TODO - Implement conversions as From trait impls?
                 match event {
                     TrayIconEvent::Click {
@@ -1712,7 +1715,10 @@ fn run_action<P, C>(
                 let target_window = window_manager
                     .last_focused()
                     .or_else(|| window_manager.first());
-                let window_id = target_window.unwrap().state.id();
+                let window_id = match target_window {
+                    Some(w) => w.state.id(),
+                    None => return,
+                };
                 events.push((
                     window_id,
                     core::Event::TrayIcon(
