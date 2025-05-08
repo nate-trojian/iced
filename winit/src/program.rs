@@ -3,6 +3,7 @@ mod state;
 mod window_manager;
 
 pub use state::State;
+use tray_icon::TrayIconBuilder;
 
 use crate::conversion;
 use crate::core;
@@ -174,6 +175,7 @@ where
             internal_tray_icon::Action::TrayMenuEvent(e),
         ));
     }));
+    let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 
@@ -1549,6 +1551,7 @@ fn run_action<P, C>(
                     .last_focused()
                     .or_else(|| window_manager.first());
                 let window_id = target_window.unwrap().state.id();
+                // TODO - Implement conversions as From trait impls?
                 match event {
                     TrayIconEvent::Click {
                         id,
@@ -1628,9 +1631,15 @@ fn run_action<P, C>(
                                         height: rect.size.height as f32,
                                     },
                                     button: match button {
-                                        tray_icon::MouseButton::Left => mouse::Button::Left,
-                                        tray_icon::MouseButton::Middle => mouse::Button::Middle,
-                                        tray_icon::MouseButton::Right => mouse::Button::Right,
+                                        tray_icon::MouseButton::Left => {
+                                            mouse::Button::Left
+                                        }
+                                        tray_icon::MouseButton::Middle => {
+                                            mouse::Button::Middle
+                                        }
+                                        tray_icon::MouseButton::Right => {
+                                            mouse::Button::Right
+                                        }
                                     },
                                 },
                             ),
