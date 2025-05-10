@@ -1229,6 +1229,7 @@ fn run_action<P, C>(
     C: Compositor<Renderer = P::Renderer> + 'static,
     P::Theme: theme::Base,
 {
+    use crate::core::window::GLOBAL;
     use crate::runtime::clipboard;
     use crate::runtime::system;
     use crate::runtime::window;
@@ -1547,13 +1548,14 @@ fn run_action<P, C>(
         },
         Action::TrayIcon(action) => match action {
             internal_tray_icon::Action::TrayIconEvent(event) => {
-                let target_window = window_manager
-                    .last_focused()
-                    .or_else(|| window_manager.first());
-                let window_id = match target_window {
-                    Some(w) => w.state.id(),
-                    None => return,
-                };
+                // let target_window = window_manager
+                //     .last_focused()
+                //     .or_else(|| window_manager.first());
+                // let window_id = match target_window {
+                //     Some(w) => w.state.id(),
+                //     None => return,
+                // };
+                let window_id = GLOBAL;
                 // TODO - Implement conversions as From trait impls?
                 match event {
                     TrayIconEvent::Click {

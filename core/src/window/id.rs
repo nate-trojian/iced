@@ -6,6 +6,8 @@ use std::sync::atomic::{self, AtomicU64};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(u64);
 
+/// Id of the "Global" window
+pub const GLOBAL: Id = Id(0);
 static COUNT: AtomicU64 = AtomicU64::new(1);
 
 impl Id {
