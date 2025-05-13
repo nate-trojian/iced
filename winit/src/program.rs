@@ -180,9 +180,13 @@ where
         if let Some(settings) = tray_icon_settings {
             log::info!("{:?}", settings);
             // TODO - map these to errors
-            let attrs = settings.try_into().expect("Invalid settings");
-            let _icon =
-                tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+            // let attrs = settings.try_into().expect("Invalid settings");
+            // let _icon =
+            //     tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+            let _icon = tray_icon::TrayIconBuilder::new()
+                .with_title("Test")
+                .build()
+                .unwrap();
         }
     }
 
