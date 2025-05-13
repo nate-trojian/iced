@@ -32,6 +32,7 @@
 //! ```
 use crate::program::{self, Program};
 use crate::theme;
+use crate::tray_icon;
 use crate::window;
 use crate::{
     Element, Executor, Font, Result, Settings, Size, Subscription, Task,
@@ -132,6 +133,7 @@ where
         },
         settings: Settings::default(),
         window: window::Settings::default(),
+        tray_icon: None,
     }
     .title(title)
 }
@@ -148,6 +150,7 @@ pub struct Application<P: Program> {
     raw: P,
     settings: Settings,
     window: window::Settings,
+    tray_icon: Option<tray_icon::Settings>,
 }
 
 impl<P: Program> Application<P> {
@@ -163,7 +166,8 @@ impl<P: Program> Application<P> {
         Self: 'static,
         P::State: Default,
     {
-        self.raw.run(self.settings, Some(self.window))
+        self.raw
+            .run(self.settings, Some(self.window), self.tray_icon)
     }
 
     /// Runs the [`Application`] with a closure that creates the initial state.
@@ -173,7 +177,7 @@ impl<P: Program> Application<P> {
         I: FnOnce() -> (P::State, Task<P::Message>) + 'static,
     {
         self.raw
-            .run_with(self.settings, Some(self.window), initialize)
+            .run_with(self.settings, Some(self.window), None, initialize)
     }
 
     /// Sets the [`Settings`] that will be used to run the [`Application`].
@@ -214,6 +218,17 @@ impl<P: Program> Application<P> {
     /// Overwrites any previous [`window::Settings`].
     pub fn window(self, window: window::Settings) -> Self {
         Self { window, ..self }
+    }
+
+    #[cfg(feature = "tray-icon")]
+    /// Sets the [`tray_icon::Settings`] of the [`Application`].
+    ///
+    /// Overwrites any previous [`tray_icon::Settings`].
+    pub fn tray_icon(self, tray_icon_settings: tray_icon::Settings) -> Self {
+        Self {
+            tray_icon: Some(tray_icon_settings),
+            ..self
+        }
     }
 
     /// Sets the [`window::Settings::position`] to [`window::Position::Centered`] in the [`Application`].
@@ -317,6 +332,7 @@ impl<P: Program> Application<P> {
             }),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -331,6 +347,7 @@ impl<P: Program> Application<P> {
             raw: program::with_subscription(self.raw, f),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -345,6 +362,7 @@ impl<P: Program> Application<P> {
             raw: program::with_theme(self.raw, move |state, _window| f(state)),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -359,6 +377,7 @@ impl<P: Program> Application<P> {
             raw: program::with_style(self.raw, f),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -375,6 +394,7 @@ impl<P: Program> Application<P> {
             }),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -391,6 +411,7 @@ impl<P: Program> Application<P> {
             raw: program::with_executor::<P, E>(self.raw),
             settings: self.settings,
             window: self.window,
+            tray_icon: self.tray_icon,
         }
     }
 }

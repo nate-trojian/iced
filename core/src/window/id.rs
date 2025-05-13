@@ -6,7 +6,8 @@ use std::sync::atomic::{self, AtomicU64};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(u64);
 
-/// Id of the "Global" window
+/// Id of the "Global" window. Will never match a window Id,
+/// which means any message sent to it will automatically be marked as Status::Ignored
 pub const GLOBAL: Id = Id(0);
 static COUNT: AtomicU64 = AtomicU64::new(1);
 

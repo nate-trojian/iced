@@ -1,4 +1,4 @@
-use crate::core::text;
+use crate::core::{text, tray_icon};
 use crate::graphics::compositor;
 use crate::shell;
 use crate::theme;
@@ -72,12 +72,13 @@ pub trait Program: Sized {
         self,
         settings: Settings,
         window_settings: Option<window::Settings>,
+        tray_icon_settings: Option<tray_icon::Settings>,
     ) -> Result
     where
         Self: 'static,
         Self::State: Default,
     {
-        self.run_with(settings, window_settings, || {
+        self.run_with(settings, window_settings, tray_icon_settings, || {
             (Self::State::default(), Task::none())
         })
     }
@@ -87,6 +88,7 @@ pub trait Program: Sized {
         self,
         settings: Settings,
         window_settings: Option<window::Settings>,
+        tray_icon_settings: Option<tray_icon::Settings>,
         initialize: I,
     ) -> Result
     where
@@ -187,6 +189,7 @@ pub trait Program: Sized {
             .into(),
             renderer_settings,
             window_settings,
+            tray_icon_settings,
             (self, initialize),
         )?)
     }

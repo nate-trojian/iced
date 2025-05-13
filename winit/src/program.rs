@@ -3,7 +3,6 @@ mod state;
 mod window_manager;
 
 pub use state::State;
-use tray_icon::TrayIconBuilder;
 
 use crate::conversion;
 use crate::core;
@@ -27,7 +26,6 @@ use crate::runtime::user_interface::{self, UserInterface};
 use crate::runtime::{self, Action, Task, tray_icon as internal_tray_icon};
 use crate::{Clipboard, Error, Proxy, Settings};
 
-use tray_icon::TrayIconEvent;
 use window_manager::WindowManager;
 
 use rustc_hash::FxHashMap;
@@ -143,10 +141,12 @@ where
 
 /// Runs a [`Program`] with an executor, compositor, and the provided
 /// settings.
+#[allow(unused_variables)]
 pub fn run<P, C>(
     settings: Settings,
     graphics_settings: graphics::Settings,
     window_settings: Option<window::Settings>,
+    tray_icon_settings: Option<internal_tray_icon::Settings>,
     flags: P::Flags,
 ) -> Result<(), Error>
 where
@@ -163,19 +163,27 @@ where
         .build()
         .expect("Create event loop");
 
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy.send_event(Action::TrayIcon(
-            internal_tray_icon::Action::TrayIconEvent(e),
-        ));
-    }));
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy.send_event(Action::TrayIcon(
-            internal_tray_icon::Action::TrayMenuEvent(e),
-        ));
-    }));
-    let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
+    #[cfg(feature = "tray-icon")]
+    {
+        let event_loop_proxy = event_loop.create_proxy();
+        tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
+            let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                internal_tray_icon::Event::from(e),
+            ));
+        }));
+        let event_loop_proxy = event_loop.create_proxy();
+        tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
+            let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                internal_tray_icon::Event::from(e),
+            ));
+        }));
+        if let Some(settings) = tray_icon_settings {
+            // TODO - map these to errors
+            let attrs = settings.try_into().expect("Invalid settings");
+            let _icon =
+                tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+        }
+    }
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 
@@ -1546,191 +1554,9 @@ fn run_action<P, C>(
                 }
             }
         },
-        Action::TrayIcon(action) => match action {
-            internal_tray_icon::Action::TrayIconEvent(event) => {
-                // let target_window = window_manager
-                //     .last_focused()
-                //     .or_else(|| window_manager.first());
-                // let window_id = match target_window {
-                //     Some(w) => w.state.id(),
-                //     None => return,
-                // };
-                let window_id = GLOBAL;
-                // TODO - Implement conversions as From trait impls?
-                match event {
-                    TrayIconEvent::Click {
-                        id,
-                        position,
-                        rect,
-                        button,
-                        button_state,
-                    } => match button_state {
-                        tray_icon::MouseButtonState::Up => {
-                            events.push((
-                                window_id,
-                                core::Event::TrayIcon(
-                                    core::tray_icon::Event::MouseButtonPressed {
-                                        id: id.0,
-                                        position: core::Point {
-                                            x: position.x as f32,
-                                            y: position.y as f32
-                                        },
-                                        rect: core::Rectangle {
-                                            x: rect.position.x as f32,
-                                            y: rect.position.y as f32,
-                                            width: rect.size.width as f32,
-                                            height: rect.size.height as f32
-                                        },
-                                        button: match button {
-                                            tray_icon::MouseButton::Left => core::mouse::Button::Left,
-                                            tray_icon::MouseButton::Middle => core::mouse::Button::Middle,
-                                            tray_icon::MouseButton::Right => core::mouse::Button::Right,
-                                        }
-                                    })
-                            ));
-                        }
-                        tray_icon::MouseButtonState::Down => {
-                            events.push((
-                                window_id,
-                                core::Event::TrayIcon(
-                                    core::tray_icon::Event::MouseButtonReleased {
-                                        id: id.0,
-                                        position: core::Point {
-                                            x: position.x as f32,
-                                            y: position.y as f32
-                                        },
-                                        rect: core::Rectangle {
-                                            x: rect.position.x as f32,
-                                            y: rect.position.y as f32,
-                                            width: rect.size.width as f32,
-                                            height: rect.size.height as f32
-                                        },
-                                        button: match button {
-                                            tray_icon::MouseButton::Left => mouse::Button::Left,
-                                            tray_icon::MouseButton::Middle => mouse::Button::Middle,
-                                            tray_icon::MouseButton::Right => mouse::Button::Right,
-                                        }
-                                    })
-                            ));
-                        }
-                    },
-                    TrayIconEvent::DoubleClick {
-                        id,
-                        position,
-                        rect,
-                        button,
-                    } => {
-                        events.push((
-                            window_id,
-                            core::Event::TrayIcon(
-                                core::tray_icon::Event::DoubleClicked {
-                                    id: id.0,
-                                    position: core::Point {
-                                        x: position.x as f32,
-                                        y: position.y as f32,
-                                    },
-                                    rect: core::Rectangle {
-                                        x: rect.position.x as f32,
-                                        y: rect.position.y as f32,
-                                        width: rect.size.width as f32,
-                                        height: rect.size.height as f32,
-                                    },
-                                    button: match button {
-                                        tray_icon::MouseButton::Left => {
-                                            mouse::Button::Left
-                                        }
-                                        tray_icon::MouseButton::Middle => {
-                                            mouse::Button::Middle
-                                        }
-                                        tray_icon::MouseButton::Right => {
-                                            mouse::Button::Right
-                                        }
-                                    },
-                                },
-                            ),
-                        ));
-                    }
-                    TrayIconEvent::Enter { id, position, rect } => {
-                        events.push((
-                            window_id,
-                            core::Event::TrayIcon(
-                                core::tray_icon::Event::MouseEntered {
-                                    id: id.0,
-                                    position: core::Point {
-                                        x: position.x as f32,
-                                        y: position.y as f32,
-                                    },
-                                    rect: core::Rectangle {
-                                        x: rect.position.x as f32,
-                                        y: rect.position.y as f32,
-                                        width: rect.size.width as f32,
-                                        height: rect.size.height as f32,
-                                    },
-                                },
-                            ),
-                        ));
-                    }
-                    TrayIconEvent::Move { id, position, rect } => {
-                        events.push((
-                            window_id,
-                            core::Event::TrayIcon(
-                                core::tray_icon::Event::MouseMoved {
-                                    id: id.0,
-                                    position: core::Point {
-                                        x: position.x as f32,
-                                        y: position.y as f32,
-                                    },
-                                    rect: core::Rectangle {
-                                        x: rect.position.x as f32,
-                                        y: rect.position.y as f32,
-                                        width: rect.size.width as f32,
-                                        height: rect.size.height as f32,
-                                    },
-                                },
-                            ),
-                        ));
-                    }
-                    TrayIconEvent::Leave { id, position, rect } => {
-                        events.push((
-                            window_id,
-                            core::Event::TrayIcon(
-                                core::tray_icon::Event::MouseExited {
-                                    id: id.0,
-                                    position: core::Point {
-                                        x: position.x as f32,
-                                        y: position.y as f32,
-                                    },
-                                    rect: core::Rectangle {
-                                        x: rect.position.x as f32,
-                                        y: rect.position.y as f32,
-                                        width: rect.size.width as f32,
-                                        height: rect.size.height as f32,
-                                    },
-                                },
-                            ),
-                        ));
-                    }
-                    _ => todo!(),
-                }
-            }
-            internal_tray_icon::Action::TrayMenuEvent(event) => {
-                let target_window = window_manager
-                    .last_focused()
-                    .or_else(|| window_manager.first());
-                let window_id = match target_window {
-                    Some(w) => w.state.id(),
-                    None => return,
-                };
-                events.push((
-                    window_id,
-                    core::Event::TrayIcon(
-                        core::tray_icon::Event::MenuItemClicked {
-                            id: event.id.0,
-                        },
-                    ),
-                ));
-            }
-        },
+        Action::TrayIcon(event) => {
+            events.push((GLOBAL, core::Event::TrayIcon(event)))
+        }
         Action::Widget(operation) => {
             let mut current_operation = Some(operation);
 

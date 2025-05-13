@@ -435,14 +435,14 @@
 //!                     }
 //!                  }
 //!             } else {
-//!                 Task::none()    
+//!                 Task::none()
 //!             }
 //!         }
 //!         Message::Conversation(message) => {
 //!             if let Screen::Conversation(conversation) = &mut state.screen {
 //!                 conversation.update(message).map(Message::Conversation)
 //!             } else {
-//!                 Task::none()    
+//!                 Task::none()
 //!             }
 //!         }
 //!     }
@@ -496,6 +496,8 @@ pub mod window;
 
 #[cfg(feature = "advanced")]
 pub mod advanced;
+
+pub mod tray_icon;
 
 pub use crate::core::alignment;
 pub use crate::core::animation;

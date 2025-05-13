@@ -1,9 +1,9 @@
 //! Create and run daemons that run in the background.
-use crate::application;
 use crate::program::{self, Program};
 use crate::theme;
 use crate::window;
 use crate::{Element, Executor, Font, Result, Settings, Subscription, Task};
+use crate::{application, tray_icon};
 
 use std::borrow::Cow;
 
@@ -81,6 +81,7 @@ where
             _renderer: PhantomData,
         },
         settings: Settings::default(),
+        tray_icon: None,
     }
     .title(title)
 }
@@ -96,6 +97,7 @@ where
 pub struct Daemon<P: Program> {
     raw: P,
     settings: Settings,
+    tray_icon: Option<tray_icon::Settings>,
 }
 
 impl<P: Program> Daemon<P> {
@@ -111,7 +113,7 @@ impl<P: Program> Daemon<P> {
         Self: 'static,
         P::State: Default,
     {
-        self.raw.run(self.settings, None)
+        self.raw.run(self.settings, None, self.tray_icon)
     }
 
     /// Runs the [`Daemon`] with a closure that creates the initial state.
@@ -120,7 +122,8 @@ impl<P: Program> Daemon<P> {
         Self: 'static,
         I: FnOnce() -> (P::State, Task<P::Message>) + 'static,
     {
-        self.raw.run_with(self.settings, None, initialize)
+        self.raw
+            .run_with(self.settings, None, self.tray_icon, initialize)
     }
 
     /// Sets the [`Settings`] that will be used to run the [`Daemon`].
@@ -168,6 +171,7 @@ impl<P: Program> Daemon<P> {
                 title.title(state, window)
             }),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -181,6 +185,7 @@ impl<P: Program> Daemon<P> {
         Daemon {
             raw: program::with_subscription(self.raw, f),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -194,6 +199,7 @@ impl<P: Program> Daemon<P> {
         Daemon {
             raw: program::with_theme(self.raw, f),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -207,6 +213,7 @@ impl<P: Program> Daemon<P> {
         Daemon {
             raw: program::with_style(self.raw, f),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -220,6 +227,7 @@ impl<P: Program> Daemon<P> {
         Daemon {
             raw: program::with_scale_factor(self.raw, f),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 
@@ -235,6 +243,7 @@ impl<P: Program> Daemon<P> {
         Daemon {
             raw: program::with_executor::<P, E>(self.raw),
             settings: self.settings,
+            tray_icon: self.tray_icon,
         }
     }
 }

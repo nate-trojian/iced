@@ -2720,6 +2720,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "smol_str",
  "thiserror 1.0.69",
+ "tray-icon",
  "web-time",
 ]
 

@@ -71,8 +71,8 @@ pub enum Action<T> {
     /// Run a system action.
     System(system::Action),
 
-    /// Run a tray icon action.
-    TrayIcon(tray_icon::Action),
+    /// Pass through a Tray Icon Event
+    TrayIcon(tray_icon::Event),
 
     /// Exits the runtime.
     ///
@@ -121,7 +121,9 @@ where
             }
             Action::Window(_) => write!(f, "Action::Window"),
             Action::System(action) => write!(f, "Action::System({action:?})"),
-            Action::TrayIcon(action) => write!(f, "Action::TrayIcon({action:?})"),
+            Action::TrayIcon(action) => {
+                write!(f, "Action::TrayIcon({action:?})")
+            }
             Action::Exit => write!(f, "Action::Exit"),
         }
     }

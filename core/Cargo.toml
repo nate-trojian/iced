@@ -16,6 +16,7 @@ workspace = true
 [features]
 auto-detect-theme = ["dep:dark-light"]
 advanced = []
+tray-icon = ["dep:tray-icon"]
 
 [dependencies]
 bitflags.workspace = true
@@ -33,6 +34,9 @@ web-time.workspace = true
 
 dark-light.workspace = true
 dark-light.optional = true
+
+tray-icon.workspace = true
+tray-icon.optional = true
 
 [dev-dependencies]
 approx = "0.5"
