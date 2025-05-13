@@ -140,6 +140,18 @@ where
     }
 }
 
+fn build_tray_icon(settings: Option<internal_tray_icon::Settings>) {
+    if settings.is_none() {
+        return;
+    }
+    let settings = settings.unwrap();
+    log::info!("{:?}", settings);
+    // TODO - map these to errors
+    // let attrs = settings.try_into().expect("Invalid settings");
+    // let _icon = tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+    let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
+}
+
 /// Runs a [`Program`] with an executor, compositor, and the provided
 /// settings.
 #[allow(unused_variables)]
@@ -176,14 +188,7 @@ where
         let _ = event_loop_proxy
             .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
     }));
-    if let Some(settings) = tray_icon_settings {
-        log::info!("{:?}", settings);
-        // TODO - map these to errors
-        // let attrs = settings.try_into().expect("Invalid settings");
-        // let _icon =
-        //     tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
-        let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
-    }
+    build_tray_icon(tray_icon_settings);
     // }
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
