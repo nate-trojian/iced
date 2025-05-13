@@ -35,8 +35,10 @@ impl TryFrom<Settings> for tray_icon::TrayIconAttributes {
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct Icon {
-    rgba: Vec<u8>,
-    size: Size<u32>,
+    /// RGBA byte data of icon image
+    pub rgba: Vec<u8>,
+    /// Size of icon image
+    pub size: Size<u32>,
 }
 
 #[cfg(feature = "tray-icon")]
