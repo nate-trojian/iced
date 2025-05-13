@@ -231,6 +231,17 @@ impl<P: Program> Daemon<P> {
         }
     }
 
+    #[cfg(feature = "tray-icon")]
+    /// Sets the [`tray_icon::Settings`] of the [`Daemon`].
+    ///
+    /// Overwrites any previous [`tray_icon::Settings`].
+    pub fn tray_icon(self, tray_icon_settings: tray_icon::Settings) -> Self {
+        Self {
+            tray_icon: Some(tray_icon_settings),
+            ..self
+        }
+    }
+
     /// Sets the executor of the [`Daemon`].
     pub fn executor<E>(
         self,
