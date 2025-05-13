@@ -178,16 +178,16 @@ where
 
     // #[cfg(feature = "tray-icon")]
     // {
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy
-            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
-    }));
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy
-            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
-    }));
+    // let event_loop_proxy = event_loop.create_proxy();
+    // tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
+    //     let _ = event_loop_proxy
+    //         .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
+    // }));
+    // let event_loop_proxy = event_loop.create_proxy();
+    // tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
+    //     let _ = event_loop_proxy
+    //         .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
+    // }));
     build_tray_icon(tray_icon_settings);
     // }
 
