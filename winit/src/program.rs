@@ -26,6 +26,7 @@ use crate::runtime::user_interface::{self, UserInterface};
 use crate::runtime::{self, Action, Task, tray_icon as internal_tray_icon};
 use crate::{Clipboard, Error, Proxy, Settings};
 
+use tray_icon::TrayIconBuilder;
 use window_manager::WindowManager;
 
 use rustc_hash::FxHashMap;
@@ -181,11 +182,8 @@ where
         // let attrs = settings.try_into().expect("Invalid settings");
         // let _icon =
         //     tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
-        let _icon = tray_icon::TrayIconBuilder::new()
-            .with_title("Test")
-            .build()
-            .unwrap();
     }
+    let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
     // }
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
