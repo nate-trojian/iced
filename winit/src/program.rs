@@ -140,6 +140,7 @@ where
     }
 }
 
+#[inline]
 fn build_tray_icon(settings: Option<internal_tray_icon::Settings>) {
     if settings.is_none() {
         return;
