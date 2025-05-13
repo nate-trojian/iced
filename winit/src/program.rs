@@ -177,7 +177,7 @@ where
         .build()
         .expect("Create event loop");
 
-    #[cfg(feature = "tray-icon")]
+    // #[cfg(feature = "tray-icon")]
     {
         // let event_loop_proxy = event_loop.create_proxy();
         // tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
