@@ -178,6 +178,7 @@ where
             ));
         }));
         if let Some(settings) = tray_icon_settings {
+            log::info!("{:?}", settings);
             // TODO - map these to errors
             let attrs = settings.try_into().expect("Invalid settings");
             let _icon =
