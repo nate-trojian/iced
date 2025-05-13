@@ -177,9 +177,15 @@ where
     log::info!("{:?}", tray_icon_settings);
 
     // TODO - map these to errors
-    // let attrs = settings.try_into().expect("Invalid settings");
-    // let _icon = tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
-    let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
+    #[cfg(feature = "tray-icon")]
+    let attrs = tray_icon_settings
+        .unwrap()
+        .try_into()
+        .expect("Invalid settings");
+    #[cfg(feature = "tray-icon")]
+    let _icon = tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+    // #[cfg(feature = "tray-icon")]
+    // let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 
