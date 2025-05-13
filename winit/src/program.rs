@@ -163,32 +163,30 @@ where
         .build()
         .expect("Create event loop");
 
-    #[cfg(feature = "tray-icon")]
-    {
-        let event_loop_proxy = event_loop.create_proxy();
-        tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
-            let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                internal_tray_icon::Event::from(e),
-            ));
-        }));
-        let event_loop_proxy = event_loop.create_proxy();
-        tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
-            let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                internal_tray_icon::Event::from(e),
-            ));
-        }));
-        if let Some(settings) = tray_icon_settings {
-            log::info!("{:?}", settings);
-            // TODO - map these to errors
-            // let attrs = settings.try_into().expect("Invalid settings");
-            // let _icon =
-            //     tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
-            let _icon = tray_icon::TrayIconBuilder::new()
-                .with_title("Test")
-                .build()
-                .unwrap();
-        }
+    // #[cfg(feature = "tray-icon")]
+    // {
+    let event_loop_proxy = event_loop.create_proxy();
+    tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
+        let _ = event_loop_proxy
+            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
+    }));
+    let event_loop_proxy = event_loop.create_proxy();
+    tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
+        let _ = event_loop_proxy
+            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
+    }));
+    if let Some(settings) = tray_icon_settings {
+        log::info!("{:?}", settings);
+        // TODO - map these to errors
+        // let attrs = settings.try_into().expect("Invalid settings");
+        // let _icon =
+        //     tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+        let _icon = tray_icon::TrayIconBuilder::new()
+            .with_title("Test")
+            .build()
+            .unwrap();
     }
+    // }
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 
