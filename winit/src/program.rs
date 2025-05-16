@@ -164,28 +164,28 @@ where
         .build()
         .expect("Create event loop");
 
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy
-            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
-    }));
-    let event_loop_proxy = event_loop.create_proxy();
-    tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
-        let _ = event_loop_proxy
-            .send_event(Action::TrayIcon(internal_tray_icon::Event::from(e)));
-    }));
-    log::info!("{:?}", tray_icon_settings);
-
-    // TODO - map these to errors
     #[cfg(feature = "tray-icon")]
-    let attrs = tray_icon_settings
-        .unwrap()
-        .try_into()
-        .expect("Invalid settings");
+    {
+        let event_loop_proxy = event_loop.create_proxy();
+        tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
+            let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                internal_tray_icon::Event::from(e),
+            ));
+        }));
+        let event_loop_proxy = event_loop.create_proxy();
+        tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
+            let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                internal_tray_icon::Event::from(e),
+            ));
+        }));
+    }
     #[cfg(feature = "tray-icon")]
-    let _icon = tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
-    // #[cfg(feature = "tray-icon")]
-    // let _icon = TrayIconBuilder::new().with_title("Test").build().unwrap();
+    let _icon = tray_icon_settings.and_then(|settings| {
+        // TODO - map these to errors
+        let attrs = settings.try_into().expect("Invalid tray_icon settings");
+        let icon = tray_icon::TrayIcon::new(attrs).expect("Create tray icon");
+        Some(icon)
+    });
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 
