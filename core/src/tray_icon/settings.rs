@@ -1,5 +1,6 @@
 //! Tray icon settings
 
+#[cfg(feature = "tray-icon")]
 use crate::tray_icon::Error;
 
 use crate::Size;

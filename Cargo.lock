@@ -2788,7 +2788,6 @@ dependencies = [
  "raw-window-handle 0.6.2",
  "sipper",
  "thiserror 1.0.69",
- "tray-icon",
 ]
 
 [[package]]

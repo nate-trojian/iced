@@ -23,8 +23,11 @@ use crate::graphics;
 use crate::graphics::{Compositor, compositor};
 use crate::runtime::Debug;
 use crate::runtime::user_interface::{self, UserInterface};
-use crate::runtime::{self, Action, Task, tray_icon as internal_tray_icon};
+use crate::runtime::{self, Action, Task};
 use crate::{Clipboard, Error, Proxy, Settings};
+
+#[cfg(feature = "tray-icon")]
+use tray_icon::TrayIcon;
 
 use window_manager::WindowManager;
 
@@ -139,14 +142,15 @@ where
     }
 }
 
+#[cfg(feature = "tray-icon")]
 fn build_tray_icon(
-    settings: Option<internal_tray_icon::Settings>,
-) -> Result<Option<tray_icon::TrayIcon>, Error> {
+    settings: Option<runtime::tray_icon::Settings>,
+) -> Result<Option<TrayIcon>, Error> {
     match settings {
         Some(settings) => {
             let attrs = settings.try_into()?;
-            let icon = tray_icon::TrayIcon::new(attrs)
-                .map_err(internal_tray_icon::Error::from)?;
+            let icon = TrayIcon::new(attrs)
+                .map_err(runtime::tray_icon::Error::from)?;
             Ok(Some(icon))
         }
         None => Ok(None),
@@ -160,7 +164,7 @@ pub fn run<P, C>(
     settings: Settings,
     graphics_settings: graphics::Settings,
     window_settings: Option<window::Settings>,
-    tray_icon_settings: Option<internal_tray_icon::Settings>,
+    tray_icon_settings: Option<runtime::tray_icon::Settings>,
     flags: P::Flags,
 ) -> Result<(), Error>
 where
@@ -179,16 +183,18 @@ where
 
     #[cfg(feature = "tray-icon")]
     {
+        use tray_icon::{TrayIconEvent, menu::MenuEvent};
+
         let event_loop_proxy = event_loop.create_proxy();
-        tray_icon::TrayIconEvent::set_event_handler(Some(move |e| {
+        TrayIconEvent::set_event_handler(Some(move |e| {
             let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                internal_tray_icon::Event::from(e),
+                runtime::tray_icon::Event::from(e),
             ));
         }));
         let event_loop_proxy = event_loop.create_proxy();
-        tray_icon::menu::MenuEvent::set_event_handler(Some(move |e| {
+        MenuEvent::set_event_handler(Some(move |e| {
             let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                internal_tray_icon::Event::from(e),
+                runtime::tray_icon::Event::from(e),
             ));
         }));
     }
