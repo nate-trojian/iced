@@ -15,6 +15,11 @@ pub enum Error {
     /// The application graphics context could not be created.
     #[error("the application graphics context could not be created")]
     GraphicsCreationFailed(graphics::Error),
+
+    /// The application tray icon could not be created
+    #[cfg(feature = "tray-icon")]
+    #[error("the application tray icon could not be created")]
+    TrayIconCreationFailed(#[from] iced_runtime::tray_icon::Error),
 }
 
 impl From<graphics::Error> for Error {

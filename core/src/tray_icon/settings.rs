@@ -1,5 +1,7 @@
 //! Tray icon settings
 
+use crate::tray_icon::Error;
+
 use crate::Size;
 
 /// Tray icon settings
@@ -15,7 +17,7 @@ pub struct Settings {
 
 #[cfg(feature = "tray-icon")]
 impl TryFrom<Settings> for tray_icon::TrayIconAttributes {
-    type Error = tray_icon::BadIcon;
+    type Error = Error;
     fn try_from(value: Settings) -> Result<Self, Self::Error> {
         let mut attrs = Self::default();
         if let Some(title) = value.title {
@@ -43,8 +45,9 @@ pub struct Icon {
 
 #[cfg(feature = "tray-icon")]
 impl TryFrom<Icon> for tray_icon::Icon {
-    type Error = tray_icon::BadIcon;
+    type Error = Error;
     fn try_from(value: Icon) -> Result<Self, Self::Error> {
         Self::from_rgba(value.rgba, value.size.width, value.size.height)
+            .map_err(Self::Error::from)
     }
 }
