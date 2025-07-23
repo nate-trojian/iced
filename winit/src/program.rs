@@ -26,9 +26,6 @@ use crate::runtime::user_interface::{self, UserInterface};
 use crate::runtime::{self, Action, Task};
 use crate::{Clipboard, Error, Proxy, Settings};
 
-#[cfg(feature = "tray-icon")]
-use tray_icon::TrayIcon;
-
 use window_manager::WindowManager;
 
 use rustc_hash::FxHashMap;
@@ -142,15 +139,12 @@ where
     }
 }
 
-#[cfg(feature = "tray-icon")]
 fn build_tray_icon(
     settings: Option<runtime::tray_icon::Settings>,
-) -> Result<Option<TrayIcon>, Error> {
+) -> Result<Option<runtime::tray_icon::TrayIcon>, Error> {
     match settings {
         Some(settings) => {
-            let attrs = settings.try_into()?;
-            let icon = TrayIcon::new(attrs)
-                .map_err(runtime::tray_icon::Error::from)?;
+            let icon = runtime::tray_icon::TrayIcon::new(settings)?;
             Ok(Some(icon))
         }
         None => Ok(None),
@@ -182,24 +176,33 @@ where
         .expect("Create event loop");
 
     #[cfg(feature = "tray-icon")]
+    let icon = build_tray_icon(tray_icon_settings)?;
+
+    #[cfg(feature = "tray-icon")]
     {
         use tray_icon::{TrayIconEvent, menu::MenuEvent};
 
-        let event_loop_proxy = event_loop.create_proxy();
-        TrayIconEvent::set_event_handler(Some(move |e| {
-            let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                runtime::tray_icon::Event::from(e),
-            ));
-        }));
-        let event_loop_proxy = event_loop.create_proxy();
-        MenuEvent::set_event_handler(Some(move |e| {
-            let _ = event_loop_proxy.send_event(Action::TrayIcon(
-                runtime::tray_icon::Event::from(e),
-            ));
-        }));
+        let icon = icon.clone();
+
+        if let Some(icon) = icon {
+            let id_map = icon.id_map();
+
+            let event_loop_proxy = event_loop.create_proxy();
+            TrayIconEvent::set_event_handler(Some(move |e| {
+                let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                    runtime::tray_icon::Event::from(e),
+                ));
+            }));
+            let event_loop_proxy = event_loop.create_proxy();
+            MenuEvent::set_event_handler(Some(move |e: MenuEvent| {
+                let _ = event_loop_proxy.send_event(Action::TrayIcon(
+                    runtime::tray_icon::Event::MenuItemClicked {
+                        id: id_map.get(&e.id.0).unwrap().clone(),
+                    },
+                ));
+            }));
+        }
     }
-    #[cfg(feature = "tray-icon")]
-    let _icon = build_tray_icon(tray_icon_settings);
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 

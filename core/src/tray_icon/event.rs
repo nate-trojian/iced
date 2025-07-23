@@ -3,7 +3,7 @@
 #[cfg(feature = "tray-icon")]
 use tray_icon::{TrayIconEvent, menu::MenuEvent};
 
-use crate::{Point, Rectangle, mouse::Button};
+use crate::{mouse::Button, Point, Rectangle};
 
 /// A tray icon interaction
 #[derive(Debug, Clone, PartialEq)]
